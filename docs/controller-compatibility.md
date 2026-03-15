@@ -21,9 +21,10 @@ If `GET_CAPS` fails:
 
 | Device Profile | Expected Cap Level |
 | --- | --- |
-| DCMT Gen1 firmware | DCMT level 1 |
-| DCMT Gen2 open firmware | DCMT level 1 |
-| DCMT Gen2 closed firmware | DCMT level 2 |
+| DCMT Gen1 on classic Nano | DCMT level 2 |
+| DCMT Gen2 on classic Nano | DCMT level 2 |
+| DCMT Gen1 on Nano Every | DCMT level 3 |
+| DCMT Gen2 on Nano Every | DCMT level 3 |
 | RLHT Gen1 firmware | RLHT level 1 |
 | RLHT Gen2 firmware | RLHT level 1 |
 

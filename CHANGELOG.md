@@ -12,6 +12,10 @@
   - `docs/type-ids.md`
   - `docs/protocol-versioning.md`
 - Removed legacy planning/policy doc names from `docs/` and aligned README links/layout.
+- Updated DCMT capability documentation to reflect additive level semantics:
+  - Level 2: closed-position + PID
+  - Level 3: Level 2 + closed-speed
+- Updated controller compatibility matrix for DCMT MCU performance profiles (classic Nano vs Nano Every).
 
 ## [0.2.0] - 2026-03-14
 

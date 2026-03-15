@@ -38,9 +38,9 @@ Do not assume optional features.
 
 Levels:
 
-- `DCMT_CAP_LEVEL_1`: baseline open-loop profile
-- `DCMT_CAP_LEVEL_2`: closed-loop capable profile
-- `DCMT_CAP_LEVEL_3`: reserved
+- `DCMT_CAP_LEVEL_1`: open-loop + brake baseline
+- `DCMT_CAP_LEVEL_2`: Level 1 + closed-loop position + PID tuning
+- `DCMT_CAP_LEVEL_3`: Level 2 + closed-loop speed
 
 Flags:
 
