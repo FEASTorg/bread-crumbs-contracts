@@ -23,3 +23,7 @@ cmake-build-*/
 # Editor/OS
 .DS_Store
 Thumbs.db
+
+# personal files
+working/
+reference/
