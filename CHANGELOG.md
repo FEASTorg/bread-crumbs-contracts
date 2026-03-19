@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-03-18
+
+### Added
+
+- `BREAD_INVALID_I16` (`-32768` / `INT16_MIN`) sentinel constant in `bread_caps.h`: protocol-wide encoding for "field not applicable in current mode or build configuration".
+- `BREAD_INVALID_U8` (`0xFF`) sentinel for unsigned 8-bit fields.
+- `BREAD_IS_VALID_I16(v)` and `BREAD_IS_VALID_U8(v)` helper macros for side-effect-free validity checks.
+
+### Breaking (0.4.0)
+
+- `dcmt_state_result_t` fields renamed and expanded:
+  - Removed `target1`, `target2`, `value1`, `value2` (mode-normalized abstraction).
+  - Added `m1_pwm`, `m2_pwm`, `sp1`, `sp2`, `pos1`, `pos2`, `spd1`, `spd2` as explicit raw fields matching the wire layout.
+  - `sp1`/`sp2` will be `BREAD_INVALID_I16` when `mode == DCMT_MODE_OPEN_LOOP`.
+  - `spd1`/`spd2` will be `BREAD_INVALID_I16` unless `mode == DCMT_MODE_CLOSED_SPEED`.
+  - Use `BREAD_IS_VALID_I16()` before consuming these fields.
+- `dcmt_get_state` parser now performs a direct byte-to-struct copy; mode-branching interpretation removed. Callers are responsible for field validity checks.
+
 ## [0.3.0] - 2026-03-18
 
 ### Changed

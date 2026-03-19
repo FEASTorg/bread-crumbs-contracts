@@ -24,9 +24,15 @@ extern "C"
 
 #define DCMT_OP_GET_STATE 0x80
 
-// Fixed GET_STATE payload layout:
+// Fixed GET_STATE payload layout (19 bytes):
 // [mode:u8][m1_pwm:i16][m2_pwm:i16][sp1:i16][sp2:i16]
 // [pos1:i16][pos2:i16][spd1:i16][spd2:i16][brakes:u8][estop:u8]
+//
+// Sentinel BREAD_INVALID_I16 is emitted for fields not applicable in the
+// current mode or build configuration:
+//   sp1/sp2  -> BREAD_INVALID_I16 when mode == DCMT_MODE_OPEN_LOOP
+//   spd1/spd2 -> BREAD_INVALID_I16 unless mode == DCMT_MODE_CLOSED_SPEED
+// Use BREAD_IS_VALID_I16() before consuming these fields.
 #define DCMT_STATE_OFF_MODE 0
 #define DCMT_STATE_OFF_M1_PWM 1
 #define DCMT_STATE_OFF_M2_PWM 3
@@ -172,13 +178,17 @@ typedef struct
 
 typedef struct
 {
-    uint8_t mode;
-    int16_t target1;
-    int16_t target2;
-    int16_t value1;
-    int16_t value2;
-    uint8_t brakes;
-    uint8_t estop;
+    uint8_t  mode;    /* DCMT_MODE_* */
+    int16_t  m1_pwm;  /* current PWM output, always valid */
+    int16_t  m2_pwm;
+    int16_t  sp1;     /* active setpoint; BREAD_INVALID_I16 in OPEN_LOOP */
+    int16_t  sp2;
+    int16_t  pos1;    /* encoder position; always populated */
+    int16_t  pos2;
+    int16_t  spd1;    /* tachometer speed; BREAD_INVALID_I16 unless CLOSED_SPEED */
+    int16_t  spd2;
+    uint8_t  brakes;
+    uint8_t  estop;
 } dcmt_state_result_t;
 
 typedef struct
@@ -192,14 +202,6 @@ static inline int dcmt_get_state(const crumbs_device_t *dev, dcmt_state_result_t
 {
     crumbs_message_t reply;
     int rc;
-    int16_t m1_pwm = 0;
-    int16_t m2_pwm = 0;
-    int16_t sp1 = 0;
-    int16_t sp2 = 0;
-    int16_t pos1 = 0;
-    int16_t pos2 = 0;
-    int16_t spd1 = 0;
-    int16_t spd2 = 0;
 
     if (!out || dcmt_validate_query_device(dev) != 0)
         return -1;
@@ -217,58 +219,40 @@ static inline int dcmt_get_state(const crumbs_device_t *dev, dcmt_state_result_t
     if (reply.type_id != DCMT_TYPE_ID || reply.opcode != DCMT_OP_GET_STATE)
         return -1;
 
-    rc = crumbs_msg_read_u8(reply.data, reply.data_len, 0, &out->mode);
-    if (rc != 0)
-        return rc;
-
     if (reply.data_len != DCMT_STATE_FIXED_LEN)
         return -1;
 
-    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_M1_PWM, &m1_pwm);
+    rc = crumbs_msg_read_u8(reply.data, reply.data_len, DCMT_STATE_OFF_MODE, &out->mode);
     if (rc != 0)
         return rc;
-    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_M2_PWM, &m2_pwm);
+    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_M1_PWM, &out->m1_pwm);
     if (rc != 0)
         return rc;
-    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_SP1, &sp1);
+    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_M2_PWM, &out->m2_pwm);
     if (rc != 0)
         return rc;
-    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_SP2, &sp2);
+    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_SP1, &out->sp1);
     if (rc != 0)
         return rc;
-    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_POS1, &pos1);
+    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_SP2, &out->sp2);
     if (rc != 0)
         return rc;
-    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_POS2, &pos2);
+    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_POS1, &out->pos1);
     if (rc != 0)
         return rc;
-    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_SPD1, &spd1);
+    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_POS2, &out->pos2);
     if (rc != 0)
         return rc;
-    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_SPD2, &spd2);
+    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_SPD1, &out->spd1);
+    if (rc != 0)
+        return rc;
+    rc = crumbs_msg_read_i16(reply.data, reply.data_len, DCMT_STATE_OFF_SPD2, &out->spd2);
     if (rc != 0)
         return rc;
     rc = crumbs_msg_read_u8(reply.data, reply.data_len, DCMT_STATE_OFF_BRAKES, &out->brakes);
     if (rc != 0)
         return rc;
-    rc = crumbs_msg_read_u8(reply.data, reply.data_len, DCMT_STATE_OFF_ESTOP, &out->estop);
-    if (rc != 0)
-        return rc;
-
-    if (out->mode == DCMT_MODE_OPEN_LOOP)
-    {
-        out->target1 = m1_pwm;
-        out->target2 = m2_pwm;
-        out->value1 = m1_pwm;
-        out->value2 = m2_pwm;
-        return 0;
-    }
-
-    out->target1 = sp1;
-    out->target2 = sp2;
-    out->value1 = (out->mode == DCMT_MODE_CLOSED_SPEED) ? spd1 : pos1;
-    out->value2 = (out->mode == DCMT_MODE_CLOSED_SPEED) ? spd2 : pos2;
-    return 0;
+    return crumbs_msg_read_u8(reply.data, reply.data_len, DCMT_STATE_OFF_ESTOP, &out->estop);
 }
 
 static inline int dcmt_get_version(const crumbs_device_t *dev, dcmt_version_result_t *out)

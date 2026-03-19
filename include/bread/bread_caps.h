@@ -11,6 +11,26 @@ extern "C"
 {
 #endif
 
+/*
+ * Protocol-wide sentinel values for fixed-layout fields that are not applicable
+ * in the current operational mode or build configuration.
+ *
+ * Firmware emits these instead of zero so controllers can distinguish
+ * "measured/commanded zero" from "field not populated in this mode".
+ *
+ * INT16_MIN (-32768 / 0x8000) is chosen because it lies outside realistic
+ * operational ranges for position ticks, speed RPM, and temperature deci-C,
+ * and is the conventional "not available" indicator in embedded binary protocols
+ * (CAN/CANopen, J1939-style profiles).
+ *
+ * Use BREAD_IS_VALID_I16() / BREAD_IS_VALID_U8() before consuming a field.
+ */
+#define BREAD_INVALID_I16 ((int16_t)(-32768))
+#define BREAD_INVALID_U8  ((uint8_t)(0xFF))
+
+#define BREAD_IS_VALID_I16(v) ((int16_t)(v) != BREAD_INVALID_I16)
+#define BREAD_IS_VALID_U8(v)  ((uint8_t)(v) != BREAD_INVALID_U8)
+
 /* Shared capability query opcode across BREAD slices. */
 #define BREAD_OP_GET_CAPS 0x7F
 
