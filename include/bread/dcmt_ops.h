@@ -28,11 +28,12 @@ extern "C"
 // [mode:u8][m1_pwm:i16][m2_pwm:i16][sp1:i16][sp2:i16]
 // [pos1:i16][pos2:i16][spd1:i16][spd2:i16][brakes:u8][estop:u8]
 //
-// Sentinel BREAD_INVALID_I16 is emitted for fields not applicable in the
-// current mode or build configuration:
-//   sp1/sp2  -> BREAD_INVALID_I16 when mode == DCMT_MODE_OPEN_LOOP
-//   spd1/spd2 -> BREAD_INVALID_I16 unless mode == DCMT_MODE_CLOSED_SPEED
-// Use BREAD_IS_VALID_I16() before consuming these fields.
+// Field validity:
+//   Always valid (never sentinel): m1_pwm, m2_pwm, pos1, pos2, mode, brakes, estop
+//   Sentinel-eligible (may be BREAD_INVALID_I16):
+//     sp1/sp2  -> BREAD_INVALID_I16 when mode == DCMT_MODE_OPEN_LOOP
+//     spd1/spd2 -> BREAD_INVALID_I16 unless mode == DCMT_MODE_CLOSED_SPEED
+// Use BREAD_IS_VALID_I16() before consuming sentinel-eligible fields.
 #define DCMT_STATE_OFF_MODE 0
 #define DCMT_STATE_OFF_M1_PWM 1
 #define DCMT_STATE_OFF_M2_PWM 3
