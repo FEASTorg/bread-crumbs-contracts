@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-03-18
+
 ### Changed
 
 - Replaced docs set with canonical, task-oriented names and rewritten content:
@@ -16,10 +18,15 @@
   - Level 2: closed-position + PID
   - Level 3: Level 2 + closed-speed
 - Updated controller compatibility matrix for DCMT MCU performance profiles (classic Nano vs Nano Every).
+- Standardized DCMT `GET_STATE` parsing support for fixed-layout payloads via explicit field offsets/length constants.
+
+### Breaking
+
+- Enforced fixed-layout DCMT `GET_STATE` parsing in `dcmt_get_state`; legacy variable-length payload parsing has been removed.
 
 ## [0.2.0] - 2026-03-14
 
-### Added
+### Added (0.2.0)
 
 - Shared capability contract header: `include/bread/bread_caps.h`.
 - Canonical `GET_CAPS` contract support in device headers:
@@ -28,14 +35,14 @@
 - Capability constants for DCMT and RLHT (levels + flags).
 - Controller examples now expose `caps` commands and capability-aware command gating.
 
-### Breaking
+### Breaking (0.2.0)
 
 - Removed generation-scoped include paths from the public API:
   - `include/bread/gen1/*`
   - `include/bread/gen2/*`
   - `include/bread/gen3/*`
 
-### Changed
+### Changed (0.2.0)
 
 - Public include surface is now generation-free and capability-oriented.
 - `bread_ops.h` now includes canonical top-level headers:
@@ -47,7 +54,7 @@
 
 ## [0.1.0] - 2026-03-10
 
-### Added
+### Added (0.1.0)
 
 - Initial repository bootstrap.
 - Header-only contract layout under `include/bread/`.
