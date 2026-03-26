@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #ifndef BREAD_MIN_CRUMBS_VERSION
-#define BREAD_MIN_CRUMBS_VERSION 1100
+#define BREAD_MIN_CRUMBS_VERSION 1200
 #endif
 
 /* Parse opcode 0x00 version payload:

@@ -43,7 +43,7 @@ In your project `platformio.ini`:
 
 ```ini
 lib_deps =
-  cameronbrooks11/CRUMBS @ ^0.11.0
+  cameronbrooks11/CRUMBS @ ^0.12.0
   cameronbrooks11/bread-crumbs-contracts @ ^0.4.0
 ```
 
