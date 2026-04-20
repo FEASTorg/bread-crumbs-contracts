@@ -23,6 +23,12 @@ jobs:
         id: version
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
+      - name: Install linux-wire from release
+        run: |
+          mkdir -p _deps/linux-wire-install
+          curl -fsSL https://github.com/feastorg/linux-wire/releases/download/v0.1.1/linux-wire-0.1.1-linux-x86_64.tar.gz \
+            | tar -xz -C _deps/linux-wire-install
+
       - name: Install CRUMBS from release
         run: |
           mkdir -p _deps/crumbs-install
@@ -34,7 +40,7 @@ jobs:
           cmake -S . -B build/contracts \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/_deps/crumbs-install" \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/_deps/linux-wire-install;${{ github.workspace }}/_deps/crumbs-install" \
             -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/staging"
           cmake --build build/contracts --parallel
           cmake --install build/contracts
@@ -57,7 +63,7 @@ jobs:
           cmake -S build/smoke -B build/smoke/out \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/_deps/crumbs-install;${{ github.workspace }}/staging"
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/_deps/linux-wire-install;${{ github.workspace }}/_deps/crumbs-install;${{ github.workspace }}/staging"
           cmake --build build/smoke/out --parallel
 
       - name: Package source tarball

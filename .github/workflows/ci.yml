@@ -17,6 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install linux-wire from release
+        run: |
+          mkdir -p _deps/linux-wire-install
+          curl -fsSL https://github.com/feastorg/linux-wire/releases/download/v0.1.1/linux-wire-0.1.1-linux-x86_64.tar.gz \
+            | tar -xz -C _deps/linux-wire-install
+
       - name: Install CRUMBS from release
         run: |
           mkdir -p _deps/crumbs-install
@@ -27,7 +33,7 @@ jobs:
         run: |
           cmake -S . -B build/contracts \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$PWD/_deps/crumbs-install" \
+            -DCMAKE_PREFIX_PATH="$PWD/_deps/linux-wire-install;$PWD/_deps/crumbs-install" \
             -DCMAKE_INSTALL_PREFIX="$PWD/stage"
           cmake --build build/contracts --config Release --parallel
           cmake --install build/contracts
@@ -52,5 +58,5 @@ jobs:
           EOF
           cmake -S build/smoke -B build/smoke/out \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$PWD/_deps/crumbs-install;$PWD/stage"
+            -DCMAKE_PREFIX_PATH="$PWD/_deps/linux-wire-install;$PWD/_deps/crumbs-install;$PWD/stage"
           cmake --build build/smoke/out --config Release --parallel
