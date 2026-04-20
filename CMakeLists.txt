@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
-project(bread_crumbs_contracts VERSION 0.4.1 LANGUAGES C)
+project(bread_crumbs_contracts VERSION 0.4.2 LANGUAGES C)
 
-find_package(crumbs CONFIG REQUIRED)
+if(NOT TARGET crumbs AND NOT TARGET crumbs::crumbs)
+    find_package(crumbs CONFIG REQUIRED)
+endif()
 
 add_library(bread_crumbs_contracts INTERFACE)
 add_library(bread::contracts ALIAS bread_crumbs_contracts)
